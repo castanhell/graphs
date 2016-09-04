@@ -56,6 +56,9 @@ teste : teste.o grafo.o
 run : teste
 	./teste < sample
 
+rundi : teste
+	./teste < sampledi
+
 #------------------------------------------------------------------------------
 clean :
 	$(RM) exemplo teste *.o

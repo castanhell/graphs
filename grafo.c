@@ -9,10 +9,19 @@
 /* Parte1: Estruturas, Variaveis Prototipos de funcoes usadas nesse arquivo */
 
 /*Prototipos*/
-typedef struct hash_t hash_t;
 
-/* Funcoes Uteis - Hash */
+/*Grafo*/
 grafo inicia_grafo(Agraph_t *g);
+int destroi_vertices(grafo g);
+
+/*Hash*/
+typedef struct hash_t hash_t;
+hash_t * novahash (int size);
+int destroi_hash(hash_t * hash);
+unsigned long djb2(unsigned char *str);
+int index (hash_t *h, char *key);
+void insert (hash_t *h, char *key, void *value);
+void *lookup (hash_t *h, char *key);
 
 /* Hash de busca de vertices e grafo - adaptado de https://rosettacode.org/wiki/Associative_arrays/Creation/C */
 struct hash_t {
@@ -30,6 +39,13 @@ hash_t * novahash (int size) {
     if(h->values == 0) { printf("Sem memoria suficiente para alocar os valores da hash"); return 0;}
     h->size = size;
     return h;
+}
+
+int destroi_hash(hash_t *hash){
+  free(hash->keys);
+  free(hash->values);  
+  free(hash);
+  return 1;
 }
 
 unsigned long djb2(unsigned char *str)
@@ -83,7 +99,7 @@ struct grafo{
     /* Estrutura de vertices - Eh acessada como hash */
     hash_t *hashvertices;
     /* Lista de vertices - Para acesso sequencial O(|V(G)|)*/
-    vertice * vertices;
+    vertice vertices;
 };
 
 char *nome_grafo(grafo g){
@@ -137,6 +153,9 @@ vertice vertice_nome(char *s, grafo g){
 }
 
 /* Parte 4 - Leitura e escrita de grafos */
+
+
+/* Le grafo */
 
 int checa_ponderado(grafo graph, int* chkPonderado, char *peso){
     if ( peso && *peso ){
@@ -255,16 +274,43 @@ grafo le_grafo(FILE *input){
     return graph;
 }  
 
+/* destroi */
+
+int destroi_vertices(grafo g){
+    int i = 0;
+    for(i = 0; i < g->nVertices; g++){
+    }
+    free(g->vertices);
+    
+    return 1;
+}
+
 int destroi_grafo(grafo g){
     if(g == 0){
         printf("destroi_grafo: Grafo invalido\n");
         return 0;
     }
-    /* Para cada vertice : destroi arestas */
-
     /* Destroi todos os verties */
+    destroi_vertices(g);
+    /* destroi hash */
+    destroi_hash(g->hashvertices);
+    /* destroi o proprio grafo */
+    free(g);
     
     return 1;
+}
+
+/* escreve grafo */
+
+void imprime_vertices(grafo g){
+    int i;
+    for(i = 0; i < g->nVertices; i++){
+       printf("    \"%s\"\n", nome_vertice(g->vertices+i));
+    }
+}
+
+void imprime_arestas(grafo g){
+
 }
 
 grafo escreve_grafo(FILE *output, grafo g){
@@ -276,6 +322,9 @@ grafo escreve_grafo(FILE *output, grafo g){
         printf("escreve_grafo: Grafo invalido\n");
         return 0;
     }
+    printf("strict %sgraph %s {\n\n", direcionado(g) ? "di" : "", nome_grafo(g));
+    imprime_vertices(g);
+    
     return 0;
 }
 
