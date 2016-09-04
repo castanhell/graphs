@@ -1,8 +1,8 @@
-graph { 
-	a -- b; 
-	b -- c; 
-	a -- c; 
-	d -- c; 
-	e -- c; 
-	e -- a; 
+graph sample{ 
+	a -- b[peso=0.2]; 
+	b -- c[peso=0.2]; 
+	a -- c[peso=0.2]; 
+	d -- c[peso=0.2]; 
+	e -- c[peso=0.2]; 
+	e -- a[peso=0.2]; 
 } 

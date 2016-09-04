@@ -92,20 +92,31 @@ Agraph_t * inicia_grafo(Agraph_t *g){
 	return NULL;
 
     graph = (grafo) malloc(sizeof (struct grafo));
-
-    graph->direcionadoPonderado += agisdirected(g) ? 1 : 0;
+    graph->nVertices = 0;
+    graph->nArestas = 0;
+    graph->direcionadoPonderado = agisdirected(g) ? 1 : 0;
+    /* TODO  : ponderado */
     graph->nome = agnameof(g);
 
     /* Determina o numero de vertices */
-    for (Agnode_t *v=agfstnode(g); v; v=agnxtnode(g,v))
+    for (Agnode_t *v=agfstnode(g); v; v=agnxtnode(g,v)){
         graph->nVertices++;
+    }
 
     /* Aloca memoria */
     vertice v = (vertice) calloc(graph->nVertices,(sizeof (struct vertice)));
 
-    /* Insere na hash representada por v */
+    /* Determina o numero de arestas vertice */
+    for (Agnode_t *v=agfstnode(g); v; v=agnxtnode(g,v)){
+        graph->nVertices++;
+        for (Agedge_t *a=agfstedge(g,v); a; a=agnxtedge(g,a,v)) {
+          if (v == agtail(a)) {
+             graph->nArestas++; 
+          }
+        }
+        /* Para cada vertice: Insere as arestas */
+    }
 
-    /* Para cada vertice: Insere as arestas */
 
     return g;
 }
@@ -119,7 +130,7 @@ grafo le_grafo(FILE *input){
     if ( !g )
         return 0;
     agclose(inicia_grafo(g));
-    return 0;
+    return graph;
 }  
 
 int destroi_grafo(grafo g){

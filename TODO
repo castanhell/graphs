@@ -2,3 +2,4 @@ TODO:
 
 1. Qual eh o grau da aresta em um grafo direcionado?
 2. Eh necessario verificar se um no tem peso, os demais tambem devem ter?
+3. Falta inserir se eh ponderado na hora de criar o grafo
