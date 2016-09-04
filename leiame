@@ -6,5 +6,26 @@ Este arquivo descreve o raciocinio atras da resolucao do trabalho 1.
 
 Ele eh dividido em : Escolha da estrutura, detalhes da implementacao e detalhes e melhorias futuras.
 
-## Escolha da estrutura
+Este arquivo de leitura esta no padrao .md (markdown do github), logo pode ser lido com uma ferramenta de visualizacao um repositorio git.
 
+## Escolha da estrutura de dados de representacao
+
+## Detalhes da implementacao
+
+O primeiro detalhe do codigo eh que ele segue a mesma ordem de posicao das funcoes e tipos definidos no header, ou seja, dadas duas funcoes A e B no arquivo grafo.h, se A antecede B em grafo.h entao tambem antecede em grafo.c, valido para todas as funcoes. 
+
+## Testes de conformidade
+
+Executei tres testes de conformidade : O primeiro foi executar o programa teste.c. O segundo foi criar um arquivo teste2.c, o qual continha, alem dos items do arquivo, rotinas para:
+
+* Percorrer todos os vertices e comparar os graus de entrada e saida.
+* Testar a funcao hash utilizada.
+* Percorrer todas as arestas do grafo e contar o numero de vezes que cada aresta foi percorrida. 
+
+O terceiro teste, o mais simples e mais importante foi baixar novamente os arquivos do trabalho de implementacao 1 e mover apenas o arquivo teste.c. Isto assegura que durante o processo de desenvolvimento nao acabei alterando o arquivo de header de forma acidental.
+
+## Limitacoes da escolha da estrutura
+
+Como foquei no estudo das hashes e como usa-las na representacao, acabei nao testando outras alternativas promissoras, como arvores binarias. Arvores AVL e Rubro-negras paracem ser muito adequadas para armazenarem vertices e arestas, pois os tempos de insercao e busca sao pequenos (O(log(n))). A hash possui como grande limitacao o fato do pior caso ser O(n) para busca ou insercao, embora o caso medio em geral apresenta bom desempenho.
+
+De fato a minha proxima observacao sera comparar as duas tecnicas. Outra vantagem das arvores eh que elas permitem manter uma lista ordenada de vertices e arestas, o que pode ser util para implementar alguns algoritmos em grafos.
