@@ -53,42 +53,42 @@ void *lookup (hash_t *h, void *key) {
 
 /* Define o grafo, tal como detalhado no header */
 struct grafo{
-/* Nome do grafo */
-char* nome; 
-/* Propriedades do grafo : Direcionado e ponderado
-   ÃSalva um pouco de memoria, o elemento eh convertido na funcao de retorno
-   O primeiro bit 1 indica se eh direcionado, o segundo bit indica se eh ponderado
-   Ou seja, possui os seguintes valores:
-   0 - Nao eh direcionado
-   1 - Direcionado
-   2 - Ponderado
-   3 - Direcionado e ponderado
- */
-unsigned int direcionadoPonderado;
-/* Numero de vertices e arestas, sempre recalculados quando o grafo eh criado */
-unsigned int nVertices;
-unsigned int nArestas;
-/* Estrutura de vertices - Eh acessada como hash */
-vertice vertices;
+    /* Nome do grafo */
+    char* nome; 
+    /* Propriedades do grafo : Direcionado e ponderado
+    ÃSalva um pouco de memoria, o elemento eh convertido na funcao de retorno
+    O primeiro bit 1 indica se eh direcionado, o segundo bit indica se eh ponderado
+    Ou seja, possui os seguintes valores:
+    0 - Nao eh direcionado
+    1 - Direcionado
+    2 - Ponderado
+    3 - Direcionado e ponderado
+    */
+    unsigned int direcionadoPonderado;
+    /* Numero de vertices e arestas, sempre recalculados quando o grafo eh criado */
+    unsigned int nVertices;
+    unsigned int nArestas;
+    /* Estrutura de vertices - Eh acessada como hash */
+    vertice vertices;
 };
 
 /* Define uma aresta, a qual pode ser com ou sem peso */
 typedef struct aresta{
-unsigned int peso;
-/* destino da aresta */
-vertice *destino;
-/* Proximo elemento na lista, se for nulo eh o fim da lista*/
-struct aresta* prox;
+    unsigned int peso;
+    /* destino da aresta */
+    vertice *destino;
+    /* Proximo elemento na lista, se for nulo eh o fim da lista*/
+    struct aresta* prox;
 } aresta;
 
 /* Define o vertice, tal como detalhado no header */
 struct vertice{
-/* Grau para o grafo, se nao ordenado ou grau de entrada, se ordenado */
-unsigned int grau;
-unsigned int grauSaida;
-/* Numero do vertice, criado juntamente com a estrutura */
-unsigned int numero;
-/* aresta */
+    /* Grau para o grafo, se nao ordenado ou grau de entrada, se ordenado */
+    unsigned int grau;
+    unsigned int grauSaida;
+    /* Numero do vertice, criado juntamente com a estrutura */
+    unsigned int numero;
+    /* aresta */
 };
 
 
@@ -116,6 +116,35 @@ unsigned int numero_arestas(grafo g){
 
 /* Parte 2 - Leitura e escrita de grafos */
 
+int checa_ponderado(grafo graph, int* chkPonderado, char *peso){
+    if ( peso && *peso ){
+	if(!*chkPonderado){
+	    graph->direcionadoPonderado += 2;
+	    *chkPonderado = 1;
+	}
+	else if (chkPonderado){
+	    if (!ponderado(graph)){
+		/* Todas as arestas devem possuir peso */
+		printf("Todas as arestas devem possuir peso\n");
+		return 0;
+	    }
+	}
+    }
+    else{
+	if(!*chkPonderado){
+	    *chkPonderado = 1;
+	}
+	else if (chkPonderado){
+	    if (ponderado(graph)){
+		/* Todas as arestas devem possuir peso */
+		printf("Todas as arestas devem possuir peso\n");
+		return 0;
+	    }
+	}
+    }
+    return 1;
+}
+
 Agraph_t * inicia_grafo(Agraph_t *g){
     if ( !g )
 	return NULL;
@@ -124,7 +153,6 @@ Agraph_t * inicia_grafo(Agraph_t *g){
     graph->nVertices = 0;
     graph->nArestas = 0;
     graph->direcionadoPonderado = agisdirected(g) ? 1 : 0;
-    /* TODO  : ponderado */
     graph->nome = agnameof(g);
 
     /* Determina o numero de vertices */
@@ -135,24 +163,32 @@ Agraph_t * inicia_grafo(Agraph_t *g){
     /* Aloca memoria */
     vertice v = (vertice) calloc(graph->nVertices,(sizeof (struct vertice)));
 
+    /* Indica se o primeiro vertice foi checado */
+    int chkPonderado = 0;
     /* Determina o numero de arestas vertice */
     for (Agnode_t *v=agfstnode(g); v; v=agnxtnode(g,v)){
-        graph->nVertices++;
+        int edgeNumber=0;
         for (Agedge_t *a=agfstedge(g,v); a; a=agnxtedge(g,a,v)) {
-          if (v == agtail(a)) {
-             graph->nArestas++; 
-          }
+	    char *peso = agget(a, (char *)"peso");
+            /* Checa se todos os nos possuem peso caso seja ponderado */
+            if(!checa_ponderado(graph,&chkPonderado,peso)){
+                return 0;
+            }
+            /* A primeira aresta determina se o grafo possui peso ou nao. Se ela tiver aresta, todas as demais devem possuir. Idem se ela nao possuir */
+	    if (v == agtail(a)) {
+		graph->nArestas++; 
+		edgeNumber++;
+	    }
         }
         /* Para cada vertice: Insere as arestas */
     }
-
 
     return g;
 }
 
 grafo le_grafo(FILE *input){
     if (input == 0){
-	printf("le_grafo: Entrada invalida");
+	printf("le_grafo: Entrada invalida\n");
         return 0;
     }
     Agraph_t *g = agread(stdin, NULL);
@@ -164,7 +200,7 @@ grafo le_grafo(FILE *input){
 
 int destroi_grafo(grafo g){
     if(g == 0){
-        printf("destroi_grafo: Grafo invalido");
+        printf("destroi_grafo: Grafo invalido\n");
         return 0;
     }
     /* Para cada vertice : destroi arestas */
@@ -176,11 +212,11 @@ int destroi_grafo(grafo g){
 
 grafo escreve_grafo(FILE *output, grafo g){
     if (output == 0){
-	printf("escreve_grafo: saida invalida");
+	printf("escreve_grafo: saida invalida\n");
         return 0;
     }
     if(g == 0){
-        printf("escreve_grafo: Grafo invalido");
+        printf("escreve_grafo: Grafo invalido\n");
         return 0;
     }
     return 0;
