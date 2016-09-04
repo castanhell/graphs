@@ -16,6 +16,7 @@ int main(void) {
   printf("%sponderado\n", ponderado(g) ? "" : "não ");
   printf("%d vértices\n", numero_vertices(g));
   printf("%d arestas\n", numero_arestas(g));
+  printf("%d vertice \n", vertice_nome("a",g) );
 
   escreve_grafo(stdout, g);
 

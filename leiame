@@ -14,6 +14,10 @@ Este arquivo de leitura esta no padrao .md (markdown do github), logo pode ser l
 
 O primeiro detalhe do codigo eh que ele segue a mesma ordem de posicao das funcoes e tipos definidos no header, ou seja, dadas duas funcoes A e B no arquivo grafo.h, se A antecede B em grafo.h entao tambem antecede em grafo.c, valido para todas as funcoes. 
 
+Na hora de carregar os vertices, eu percorri a lista completa de vertices a partir do graphviz. Eu busquei a documentacao do header da biblioteca, mas nao encontrei nenhuma funcao que tivesse o total de vertices. Obviamente esta execucao nao altera assintoticamente o pior caso de insercao dos vertices.
+
+Peco desculpas por alguns vicios de codigo (ex: uso 0 ao inves de NULL).
+
 ## Testes de conformidade
 
 Executei tres testes de conformidade : O primeiro foi executar o programa teste.c. O segundo foi criar um arquivo teste2.c, o qual continha, alem dos items do arquivo, rotinas para:

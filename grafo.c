@@ -23,8 +23,11 @@ struct hash_t {
  
 hash_t * novahash (int size) {
     hash_t *h = calloc(1, sizeof (hash_t));
+    if(h == 0) { printf("Sem memoria suficiente para alocar a hash"); return 0;}
     h->keys = calloc(size, sizeof (char *));
+    if(h->keys == 0) { printf("Sem memoria suficiente para alocar as chaves da hash"); return 0;}
     h->values = calloc(size, sizeof (void *));
+    if(h->values == 0) { printf("Sem memoria suficiente para alocar os valores da hash"); return 0;}
     h->size = size;
     return h;
 }
@@ -55,8 +58,11 @@ void insert (hash_t *h, char *key, void *value) {
  
 void *lookup (hash_t *h, char *key) {
     int i = index(h, key);
+    printf(i);
     return h->values[i];
 }
+
+/* Parte 2 - Grafo */
 
 /* Define o grafo, tal como detalhado no header */
 struct grafo{
@@ -76,32 +82,10 @@ struct grafo{
     unsigned int nVertices;
     unsigned int nArestas;
     /* Estrutura de vertices - Eh acessada como hash */
-    hash_t hashVertices;
+    hash_t *hashvertices;
     /* Lista de vertices - Para acesso sequencial O(|V(G)|)*/
     vertice * vertices;
 };
-
-/* Define uma aresta, a qual pode ser com ou sem peso */
-typedef struct aresta{
-    unsigned int peso;
-    /* destino da aresta */
-    vertice *destino;
-    /* Proximo elemento na lista, se for nulo eh o fim da lista*/
-    struct aresta* prox;
-} aresta;
-
-/* Define o vertice, tal como detalhado no header */
-struct vertice{
-    /* nome do vertice */
-    char * nome;
-    /* Grau para o grafo, se nao ordenado ou grau de entrada, se ordenado */
-    unsigned int grau;
-    unsigned int grauSaida;
-    /* aresta */
-};
-
-
-/* Parte 2 - Funcoes relativas a grafos */
 
 char *nome_grafo(grafo g){
     return g->nome;   
@@ -123,7 +107,37 @@ unsigned int numero_arestas(grafo g){
     return g->nArestas;
 }
 
-/* Parte 2 - Leitura e escrita de grafos */
+/* Parte 3: Vertice e aresta */
+
+
+/* Define uma aresta, a qual pode ser com ou sem peso */
+typedef struct aresta{
+    unsigned int peso;
+    /* destino da aresta */
+    vertice *destino;
+    /* Proximo elemento na lista, se for nulo eh o fim da lista*/
+    struct aresta* prox;
+} aresta;
+
+/* Define o vertice, tal como detalhado no header */
+struct vertice{
+    /* nome do vertice */
+    char * nome;
+    /* Grau para o grafo, se nao ordenado ou grau de entrada, se ordenado */
+    unsigned int grau;
+    unsigned int grauSaida;
+    /* aresta */
+};
+
+char *nome_vertice(vertice v){
+    return v->nome;
+}
+
+vertice vertice_nome(char *s, grafo g){
+    return lookup(g->hashvertices,s);
+}
+
+/* Parte 4 - Leitura e escrita de grafos */
 
 int checa_ponderado(grafo graph, int* chkPonderado, char *peso){
     if ( peso && *peso ){
@@ -171,11 +185,16 @@ grafo inicia_grafo(Agraph_t *g){
         graph->nVertices++;
     }
 
-    /* Aloca memoria */
+    /* Aloca memoria para o vetor de vertices e a hash */
     vertice ver = (vertice) calloc(graph->nVertices,(sizeof (struct vertice)));
     if(ver == 0){ printf("Sem memoria suficiente para alocar todos os vertices"); return 0; }
     /* Associa os vertices */
     graph->vertices = ver;
+    /* Instancia nova hash, respeitando marca experimental de 80%, segundo https://en.wikipedia.org/wiki/Hash_table */
+    /* Tambem aproveito para deixar uma sobra (25% de nVertices), para insercoes de vertices */
+    hash_t *hash = novahash((int) (1.5*graph->nVertices));
+    if(ver == 0){ printf("Sem memoria suficiente para alocar a hash"); return 0; }
+    graph->hashvertices=hash;
 
     /* Indica se o primeiro vertice foi checado */
     int chkPonderado = 0;
@@ -204,6 +223,7 @@ grafo inicia_grafo(Agraph_t *g){
                 }
 	    }
         }
+        
         /* Para cada vertice: Insere as arestas */
         /* Soh graus de entrada guardam informacao das arestas */
         aresta *ar = calloc(ver[vi].grau,sizeof(aresta));
@@ -212,6 +232,9 @@ grafo inicia_grafo(Agraph_t *g){
                 
             }
         }
+        /* Insere o vertice na hash */
+        insert(hash, ver[vi].nome, (void *) (ver+vi));
+        vi++;
     }
 
     return graph;
