@@ -18,9 +18,38 @@ Agraph_t * inicia_grafo(Agraph_t *agrapht);
 
 /* Parte 1 - Estruturas */
 
-/* Hash de busca de vertices e grafo */
-
-
+/* Hash de busca de vertices e grafo - adaptado de https://rosettacode.org/wiki/Associative_arrays/Creation/C */
+typedef struct {
+    int size;
+    void **keys;
+    void **values;
+} hash_t;
+ 
+hash_t *novahash (int size) {
+    hash_t *h = calloc(1, sizeof (hash_t));
+    h->keys = calloc(size, sizeof (void *));
+    h->values = calloc(size, sizeof (void *));
+    h->size = size;
+    return h;
+}
+ 
+int index (hash_t *h, void *key) {
+    int i = (int) key % h->size;
+    while (h->keys[i] && h->keys[i] != key)
+        i = (i + 1) % h->size;
+    return i;
+}
+ 
+void insert (hash_t *h, void *key, void *value) {
+    int i = index(h, key);
+    h->keys[i] = key;
+    h->values[i] = value;
+}
+ 
+void *lookup (hash_t *h, void *key) {
+    int i = index(h, key);
+    return h->values[i];
+}
 
 /* Define o grafo, tal como detalhado no header */
 struct grafo{
