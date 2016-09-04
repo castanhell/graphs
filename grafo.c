@@ -6,47 +6,54 @@
 #include <stdlib.h>
 #include <graphviz/cgraph.h>
 
-/* Variaveis Prototipos de funcoes usadas nesse arquivo */
-
-/*Variaveis*/
-
-grafo graph;
+/* Parte1: Estruturas, Variaveis Prototipos de funcoes usadas nesse arquivo */
 
 /*Prototipos*/
+typedef struct hash_t hash_t;
 
-Agraph_t * inicia_grafo(Agraph_t *agrapht);
-
-/* Parte 1 - Estruturas */
+/* Funcoes Uteis - Hash */
+grafo inicia_grafo(Agraph_t *g);
 
 /* Hash de busca de vertices e grafo - adaptado de https://rosettacode.org/wiki/Associative_arrays/Creation/C */
-typedef struct {
+struct hash_t {
     int size;
-    void **keys;
+    char **keys;
     void **values;
-} hash_t;
+};
  
-hash_t *novahash (int size) {
+hash_t * novahash (int size) {
     hash_t *h = calloc(1, sizeof (hash_t));
-    h->keys = calloc(size, sizeof (void *));
+    h->keys = calloc(size, sizeof (char *));
     h->values = calloc(size, sizeof (void *));
     h->size = size;
     return h;
 }
+
+unsigned long djb2(unsigned char *str)
+{
+    unsigned long hash = 5381;
+    int c;
+    
+    while (c = *str++)
+	hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    
+    return hash;
+}
  
-int index (hash_t *h, void *key) {
-    int i = (int) key % h->size;
+int index (hash_t *h, char *key) {
+    int i = djb2(key) % h->size;
     while (h->keys[i] && h->keys[i] != key)
         i = (i + 1) % h->size;
     return i;
 }
  
-void insert (hash_t *h, void *key, void *value) {
+void insert (hash_t *h, char *key, void *value) {
     int i = index(h, key);
     h->keys[i] = key;
     h->values[i] = value;
 }
  
-void *lookup (hash_t *h, void *key) {
+void *lookup (hash_t *h, char *key) {
     int i = index(h, key);
     return h->values[i];
 }
@@ -69,7 +76,9 @@ struct grafo{
     unsigned int nVertices;
     unsigned int nArestas;
     /* Estrutura de vertices - Eh acessada como hash */
-    vertice vertices;
+    hash_t hashVertices;
+    /* Lista de vertices - Para acesso sequencial O(|V(G)|)*/
+    vertice * vertices;
 };
 
 /* Define uma aresta, a qual pode ser com ou sem peso */
@@ -83,11 +92,11 @@ typedef struct aresta{
 
 /* Define o vertice, tal como detalhado no header */
 struct vertice{
+    /* nome do vertice */
+    char * nome;
     /* Grau para o grafo, se nao ordenado ou grau de entrada, se ordenado */
     unsigned int grau;
     unsigned int grauSaida;
-    /* Numero do vertice, criado juntamente com a estrutura */
-    unsigned int numero;
     /* aresta */
 };
 
@@ -145,9 +154,11 @@ int checa_ponderado(grafo graph, int* chkPonderado, char *peso){
     return 1;
 }
 
-Agraph_t * inicia_grafo(Agraph_t *g){
-    if ( !g )
-	return NULL;
+grafo inicia_grafo(Agraph_t *g){
+    if ( !g ) return NULL;
+
+    grafo graph = malloc(sizeof(struct grafo));
+    if(graph == 0 ){ printf("Erro ao alocar grafo\n"); return 0; }
 
     graph = (grafo) malloc(sizeof (struct grafo));
     graph->nVertices = 0;
@@ -161,13 +172,18 @@ Agraph_t * inicia_grafo(Agraph_t *g){
     }
 
     /* Aloca memoria */
-    vertice v = (vertice) calloc(graph->nVertices,(sizeof (struct vertice)));
+    vertice ver = (vertice) calloc(graph->nVertices,(sizeof (struct vertice)));
+    if(ver == 0){ printf("Sem memoria suficiente para alocar todos os vertices"); return 0; }
+    /* Associa os vertices */
+    graph->vertices = ver;
 
     /* Indica se o primeiro vertice foi checado */
     int chkPonderado = 0;
+    int vi = 0;
     /* Determina o numero de arestas vertice */
     for (Agnode_t *v=agfstnode(g); v; v=agnxtnode(g,v)){
-        int edgeNumber=0;
+        /* Preenche os dados do vertice */
+        ver[vi].nome=agnameof(v);
         for (Agedge_t *a=agfstedge(g,v); a; a=agnxtedge(g,a,v)) {
 	    char *peso = agget(a, (char *)"peso");
             /* Checa se todos os nos possuem peso caso seja ponderado */
@@ -177,13 +193,28 @@ Agraph_t * inicia_grafo(Agraph_t *g){
             /* A primeira aresta determina se o grafo possui peso ou nao. Se ela tiver aresta, todas as demais devem possuir. Idem se ela nao possuir */
 	    if (v == agtail(a)) {
 		graph->nArestas++; 
-		edgeNumber++;
+                ver[vi].grau += 1;
+	    }
+	    if (v == aghead(a)) {
+                if(ponderado(graph)){
+     	            ver[vi].grauSaida += 1;
+                }
+                else{
+                   ver[vi].grau += 1;
+                }
 	    }
         }
         /* Para cada vertice: Insere as arestas */
+        /* Soh graus de entrada guardam informacao das arestas */
+        aresta *ar = calloc(ver[vi].grau,sizeof(aresta));
+        for (Agedge_t *a=agfstedge(g,v); a; a=agnxtedge(g,a,v)) {
+	    if (v == aghead(a)) {
+                
+            }
+        }
     }
 
-    return g;
+    return graph;
 }
 
 grafo le_grafo(FILE *input){
@@ -191,10 +222,14 @@ grafo le_grafo(FILE *input){
 	printf("le_grafo: Entrada invalida\n");
         return 0;
     }
+
     Agraph_t *g = agread(stdin, NULL);
     if ( !g )
         return 0;
-    agclose(inicia_grafo(g));
+
+    grafo graph = inicia_grafo(g);
+    agclose(g);
+
     return graph;
 }  
 
@@ -207,7 +242,7 @@ int destroi_grafo(grafo g){
 
     /* Destroi todos os verties */
     
-    return 0;
+    return 1;
 }
 
 grafo escreve_grafo(FILE *output, grafo g){
