@@ -40,12 +40,12 @@ unsigned long djb2(unsigned char *str)
     while (c = *str++)
 	hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
     
-    return hash;
+    return (int)hash;
 }
  
 int index (hash_t *h, char *key) {
     int i = djb2(key) % h->size;
-    while (h->keys[i] && h->keys[i] != key)
+    while (h->keys[i] && strcmp(h->keys[i],key)!=0)
         i = (i + 1) % h->size;
     return i;
 }
@@ -58,7 +58,6 @@ void insert (hash_t *h, char *key, void *value) {
  
 void *lookup (hash_t *h, char *key) {
     int i = index(h, key);
-    printf(i);
     return h->values[i];
 }
 
@@ -193,7 +192,7 @@ grafo inicia_grafo(Agraph_t *g){
     /* Instancia nova hash, respeitando marca experimental de 80%, segundo https://en.wikipedia.org/wiki/Hash_table */
     /* Tambem aproveito para deixar uma sobra (25% de nVertices), para insercoes de vertices */
     hash_t *hash = novahash((int) (1.5*graph->nVertices));
-    if(ver == 0){ printf("Sem memoria suficiente para alocar a hash"); return 0; }
+    if(hash == 0){ printf("Sem memoria suficiente para alocar a hash"); return 0; }
     graph->hashvertices=hash;
 
     /* Indica se o primeiro vertice foi checado */
