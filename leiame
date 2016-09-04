@@ -10,6 +10,18 @@ Este arquivo de leitura esta no padrao .md (markdown do github), logo pode ser l
 
 ## Escolha da estrutura de dados de representacao
 
+O grafo construido eh uma especie de "Lista de Adjacencia", com algumas modificacoes.
+
+A struct grafo contem duas estruturas de dados : Um vetor nao ordenado contendo todos os vertices e uma tabela hash indexada pelo nome do vertice. Por eficiencia de memoria, a tabela hash apenas 'decora' (do padrao decorator) o vetor, ou seja, ela reaproveita os ponteiros para acessar os mesmos objetos de vertice criados no vetor, de forma que o custo de memoria adicional por vertice eh equivalenet ao tamanho de um ponteiro para o nome do vertice, outro para o proprio vertice. Alem disso ha 0.5*V ponteiros adicionais na hash, sendo V o total de vertices do grafo G, ou V(G), deliberadamente utilizados para reduzir a possibilidade de colizoes. A escolha do tamanho da hash baseia-se apenas em detalhes de implementacao de outras bibliotecas conhecidas, como a classe HashMap [3] do Java, onde os projetistas sugerem uma tabela hash 25% maior do que o numero de entradas para melhor performance.
+
+A motivacao para a escolha das hashes foi a facilidade de indexar pelo nome, tal como a assinatura do metodo vertice_nome sugeria e apresentar desempenho quase constante nos casos medios. O funcionamento das hashes eh trabalhado em problemas de bolas e cestos [1], e pode-se demonstrar, em uma analogia com aqueles problemas, que se encadearmos os itens que colidirem em uma entrada da tabela, entao com alta probabilidade, a maior lista formada na tabela (a mais longa) sera de no maximo O(log(n)/log log(n)), de forma que a hash torna-se uma boa escolha.
+
+Para implementar a hash, utilizei a funcao djb2 [2]. Ha bastantes discussoes a respeito do porque esta funcao eh eficiente e proporciona poucas colisoes.
+
+A estrutura de arestas eh identica a de vertices, sendo elas mantidas em seus respectivos vertices. Para economizar espaco, armazenei estas apenas em um dos nos, sendo o no "tail" o escolhido para armazena-las.
+
+Para facilitar consultas rapidas, criei variaveis contendo o numero de arestas e vertices na estrut1ra do grafo, bem como os graus e graus de entrada e saida nos vertices. Estas variaveis sao preenchidas quando a adicao de vertices e arestas ocorrem.
+
 ## Detalhes da implementacao
 
 O primeiro detalhe do codigo eh que ele segue a mesma ordem de posicao das funcoes e tipos definidos no header, ou seja, dadas duas funcoes A e B no arquivo grafo.h, se A antecede B em grafo.h entao tambem antecede em grafo.c, valido para todas as funcoes. 
@@ -30,6 +42,12 @@ O terceiro teste, o mais simples e mais importante foi baixar novamente os arqui
 
 ## Limitacoes da escolha da estrutura
 
-Como foquei no estudo das hashes e como usa-las na representacao, acabei nao testando outras alternativas promissoras, como arvores binarias. Arvores AVL e Rubro-negras paracem ser muito adequadas para armazenarem vertices e arestas, pois os tempos de insercao e busca sao pequenos (O(log(n))). A hash possui como grande limitacao o fato do pior caso ser O(n) para busca ou insercao, embora o caso medio em geral apresenta bom desempenho.
+Como foquei no estudo das hashes e como usa-las na representacao, acabei nao testando outras alternativas promissoras, como arvores binarias. Arvores AVL e Rubro-negras parecem ser muito adequadas para armazenarem vertices e arestas, pois os tempos de insercao e busca sao pequenos (O(log(n))). 
 
 De fato a minha proxima observacao sera comparar as duas tecnicas. Outra vantagem das arvores eh que elas permitem manter uma lista ordenada de vertices e arestas, o que pode ser util para implementar alguns algoritmos em grafos.
+
+# Referencias
+
+[1] Gupta, Anupam. Balls and bins. Disponivel em < http://www.cs.cmu.edu/~avrim/Randalgs11/lectures/lect0202.pdf >.
+[2] Yigit, Ozan. Hash Functions. Disponivel em < http://www.cse.yorku.ca/~oz/hash.html >.
+[3] Java. HashMap. Disponivel em <https://docs.oracle.com/javase/7/docs/api/java/util/HashMap.html>.
