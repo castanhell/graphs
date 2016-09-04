@@ -1,8 +1,8 @@
-digraph {
-	a -> b[peso="0.2"];
-	a -> c[peso="0.4"];
-	c -> b[peso="0.6"];
-	c -> e[peso="0.6"];
-	e -> e[peso="0.1"];
-	e -> b[peso="0.7"];
-}
+graph { 
+	a -- b; 
+	b -- c; 
+	a -- c; 
+	d -- c; 
+	e -- c; 
+	e -- a; 
+} 

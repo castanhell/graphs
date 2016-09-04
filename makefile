@@ -53,6 +53,9 @@ exemplo : exemplo.c
 teste : teste.o grafo.o
 	$(CC) $(CFLAGS) -o $@ $^ -l cgraph
 
+run : teste
+        sh teste < sample
+
 #------------------------------------------------------------------------------
 clean :
 	$(RM) exemplo teste *.o

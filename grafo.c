@@ -3,6 +3,24 @@
 
 #include "grafo.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <graphviz/cgraph.h>
+
+/* Variaveis Prototipos de funcoes usadas nesse arquivo */
+
+/*Variaveis*/
+
+grafo graph;
+
+/*Prototipos*/
+
+Agraph_t * inicia_grafo(Agraph_t *agrapht);
+
+/* Parte 1 - Estruturas */
+
+/* Hash de busca de vertices e grafo */
+
+
 
 /* Define o grafo, tal como detalhado no header */
 struct grafo{
@@ -21,7 +39,8 @@ unsigned int direcionadoPonderado;
 /* Numero de vertices e arestas, sempre recalculados quando o grafo eh criado */
 unsigned int nVertices;
 unsigned int nArestas;
-/* Estrutura de vertices */
+/* Estrutura de vertices - Eh acessada como hash */
+vertice vertices;
 };
 
 /* Define uma aresta, a qual pode ser com ou sem peso */
@@ -40,9 +59,11 @@ unsigned int grau;
 unsigned int grauSaida;
 /* Numero do vertice, criado juntamente com a estrutura */
 unsigned int numero;
-/* aresta, 10 listas */
-aresta adjacentes[10];
+/* aresta */
 };
+
+
+/* Parte 2 - Funcoes relativas a grafos */
 
 char *nome_grafo(grafo g){
     return g->nome;   
@@ -64,11 +85,40 @@ unsigned int numero_arestas(grafo g){
     return g->nArestas;
 }
 
+/* Parte 2 - Leitura e escrita de grafos */
+
+Agraph_t * inicia_grafo(Agraph_t *g){
+    if ( !g )
+	return NULL;
+
+    graph = (grafo) malloc(sizeof (struct grafo));
+
+    graph->direcionadoPonderado += agisdirected(g) ? 1 : 0;
+    graph->nome = agnameof(g);
+
+    /* Determina o numero de vertices */
+    for (Agnode_t *v=agfstnode(g); v; v=agnxtnode(g,v))
+        graph->nVertices++;
+
+    /* Aloca memoria */
+    vertice v = (vertice) calloc(graph->nVertices,(sizeof (struct vertice)));
+
+    /* Insere na hash representada por v */
+
+    /* Para cada vertice: Insere as arestas */
+
+    return g;
+}
+
 grafo le_grafo(FILE *input){
     if (input == 0){
 	printf("le_grafo: Entrada invalida");
         return 0;
     }
+    Agraph_t *g = agread(stdin, NULL);
+    if ( !g )
+        return 0;
+    agclose(inicia_grafo(g));
     return 0;
 }  
 
@@ -77,6 +127,10 @@ int destroi_grafo(grafo g){
         printf("destroi_grafo: Grafo invalido");
         return 0;
     }
+    /* Para cada vertice : destroi arestas */
+
+    /* Destroi todos os verties */
+    
     return 0;
 }
 
