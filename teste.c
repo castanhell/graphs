@@ -19,6 +19,7 @@ int main(void) {
   printf("%s\n" , nome_vertice(vertice_nome("b",g)));
   printf("%s\n" , nome_vertice(vertice_nome("d",g)));
   printf("%s\n" , nome_vertice(vertice_nome("c",g)));
+  printf("%s\n" , nome_vertice(vertice_nome("e",g)));
 
   escreve_grafo(stdout, g);
 

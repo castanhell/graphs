@@ -125,11 +125,13 @@ unsigned int numero_arestas(grafo g){
 /* Parte 3: Vertice e aresta */
 
 
-/* Define uma aresta, a qual pode ser com ou sem peso */
+/* Define uma aresta ou arco (depende do atributo ponderado do grafo) */
 typedef struct aresta{
-    unsigned int peso;
+    long int peso;
+    /* origem da aresta */
+    char* origem;
     /* destino da aresta */
-    vertice destino;
+    char* destino;
 } aresta;
 
 /* Define o vertice, tal como detalhado no header */
@@ -139,7 +141,8 @@ struct vertice{
     /* Grau para o grafo, se nao ordenado ou grau de entrada, se ordenado */
     unsigned int grau;
     unsigned int grauSaida;
-    /* aresta */
+    /* aresta ou arco */
+    aresta* arestas;
 };
 
 char *nome_vertice(vertice v){
@@ -241,15 +244,22 @@ grafo inicia_grafo(Agraph_t *g){
         }
         
         /* Para cada vertice: Insere as arestas */
-        /* Soh graus de entrada guardam informacao das arestas */
         aresta *ar = calloc(ver[vi].grau,sizeof(aresta));
         if(ar == 0) { printf("Sem memoria para alocar a aresta"); return 0; }
+        /* Indice da aresta atual */
+        int ai = 0;
 
         for (Agedge_t *a=agfstedge(g,v); a; a=agnxtedge(g,a,v)) {
-	    if (v == aghead(a)) {
-		                
+	    if (v == agtail(a)) {
+                ar[ai].destino = agnameof(aghead(a));
+                ar[ai].origem = agnameof(agtail(a));
+                if(ponderado(graph)){
+                    ar[ai].peso = (long) atoi(agget(a, (char *)"peso"));
+                }
             }
+            ai++;
         }
+        ver[vi].arestas = ar;
         /* Insere o vertice na hash */
         insert(hash, ver[vi].nome, (void *) (ver+vi));
         vi++;
@@ -310,7 +320,23 @@ void imprime_vertices(grafo g){
 }
 
 void imprime_arestas(grafo g){
+    int i,j;
+    char * rep_aresta = direcionado(g) ? '>' : '-';
+    for(i = 0; i < g->nVertices; i++){
+       vertice v = g->vertices+i;
+       for( j = 0; j < v->grau;j++){
+           printf("    \"%s\" -%c \"%s\"",
+               (v->arestas+j)->origem,
+               rep_aresta,
+               (v->arestas+j)->destino
+               );
 
+           if(ponderado(g)){
+              printf(" [peso=%d]",(v->arestas+j)->peso );
+           }
+          printf("\n");
+       }
+    }
 }
 
 grafo escreve_grafo(FILE *output, grafo g){
@@ -324,6 +350,9 @@ grafo escreve_grafo(FILE *output, grafo g){
     }
     printf("strict %sgraph %s {\n\n", direcionado(g) ? "di" : "", nome_grafo(g));
     imprime_vertices(g);
+    printf("\n");
+    imprime_arestas(g);
+    printf("}\n");
     
     return 0;
 }
