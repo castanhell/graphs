@@ -1,8 +1,11 @@
 digraph sample{ 
-	a -> b[peso=0.2]; 
-	b -> c[peso=0.2]; 
-	a -> c[peso=0.2]; 
-	d -> c[peso=0.2]; 
-	e -> c[peso=0.2]; 
-	e -> a[peso=0.2]; 
+	a -> b[peso=2]; 
+	b -> c[peso=2]; 
+	a -> c[peso=2]; 
+	d -> c[peso=2]; 
+	e -> c[peso=2]; 
+	e -> a[peso=2]; 
+	k -> m[peso=2]; 
+	f -> j[peso=2]; 
+        e -> f[peso=2];
 } 

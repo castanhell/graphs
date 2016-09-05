@@ -140,7 +140,7 @@ struct vertice{
     char * nome;
     /* Grau para o grafo, se nao ordenado ou grau de entrada, se ordenado */
     unsigned int grau;
-    unsigned int grauSaida;
+    unsigned int grauEntrada;
     /* aresta ou arco */
     aresta* arestas;
 };
@@ -235,7 +235,7 @@ grafo inicia_grafo(Agraph_t *g){
 	    }
 	    if (v == aghead(a)) {
                 if(ponderado(graph)){
-     	            ver[vi].grauSaida += 1;
+     	            ver[vi].grauEntrada += 1;
                 }
                 else{
                    ver[vi].grau += 1;
@@ -356,5 +356,20 @@ grafo escreve_grafo(FILE *output, grafo g){
     
     return 0;
 }
+
+unsigned int grau(vertice v, int direcao, grafo g){
+  if (direcionado(g)){
+     switch(direcao){
+         case -1:
+            return v->grauEntrada; 
+         case 1:
+            return v->grau;
+         default:
+            return v->grau + v->grauEntrada; 
+     } 
+  }  
+  return v->grau + v->grauEntrada; 
+}
+
 
 #endif
