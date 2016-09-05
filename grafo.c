@@ -129,9 +129,7 @@ unsigned int numero_arestas(grafo g){
 typedef struct aresta{
     unsigned int peso;
     /* destino da aresta */
-    vertice *destino;
-    /* Proximo elemento na lista, se for nulo eh o fim da lista*/
-    struct aresta* prox;
+    vertice destino;
 } aresta;
 
 /* Define o vertice, tal como detalhado no header */
@@ -245,9 +243,11 @@ grafo inicia_grafo(Agraph_t *g){
         /* Para cada vertice: Insere as arestas */
         /* Soh graus de entrada guardam informacao das arestas */
         aresta *ar = calloc(ver[vi].grau,sizeof(aresta));
+        if(ar == 0) { printf("Sem memoria para alocar a aresta"); return 0; }
+
         for (Agedge_t *a=agfstedge(g,v); a; a=agnxtedge(g,a,v)) {
 	    if (v == aghead(a)) {
-                
+		                
             }
         }
         /* Insere o vertice na hash */
